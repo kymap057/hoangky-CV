@@ -1,0 +1,70 @@
+I. nodejs tổng quan
+	1.Nodejs là gì?
+	 - được viết bằng JavaScript và c++, sử dụng kỹ thuật điều khiển theo sự kiện.
+	 - cơ chế hoạt động của node nodejs được gọi là sự kiên vòng lặp (event loop): 
+		Giúp Javascript có thể thực hiện nhiều thao tác cùng một lúc, 
+		có thể xử lý cả hàng ngàn request cùng một lúc mặc dù nó chỉ dùng một thread duy nhất (Single Threaded).
+		Nếu như ở PHP hay Java thì với mỗi một request sẽ sinh ra một thread để xử lý request đó, 
+		các thread hoạt động độc lập và trả về kết quả theo request nhận được.
+	2.Thư viện nodejs
+	 - NPM (node packed manager) là một kho thư viện và các framework hỗ trợ code nodejs. khởi tạo sử dụng: npm init
+	 - khi cài đặt tất cả các thư viện được nằm trong thư mục node_modules. 
+		cú pháp: npm install tên_gói_thư_viện@Phiên_bản 
+ 	 - Để import sử dụng theo cú pháp: const <tên biến> = require('Tên_Thư_Viện');
+  	 - từ khóa let và const.
+	3. Đóng gói và gọi 1 hàm hoặc 1 class, đối tượng: 
+	 - Để đóng gói sử dụng lệnh: module.exports = { //danh sách hàm, class, đối tượng }; (sử dụng để tạo 1 lớp hoặc 1 hàm, file thông tin nhwu 1 thư viện).
+	 - Để gọi lại sử dụng require('path_file'); (có thể đặt 1 biến để đại diện cho require nhận được)
+	4. Hướng đối tượng nodejs và các loại function:
+	 - OOP trong nodejs cũng đủ 4 tính chất trong hướng đối tượng(kế thừa, đa hình, đóng gói, trừu tượng).
+	 - Trong nodej kế thừa sử dụng từ khóa ` extends `.
+	 - có 2 loại function được dùng trong nodej js: arrow function (hàm mũi tên) và manual function (function trong js).
+	 - Trong các lớp đối tượng không nên dùng arrow function vì từ khóa this sẽ không được định nghĩa tại đối tượng sử dụng trong class.
+	5. xử lý bất đồng bộ:
+	 - callback: Là kiểu xử lí bất đồng bộ trong nodejs.callback sẽ được gọi cho khi tất cả sự kiện hàm callback thực hiện xong.
+	 - promies: Xử lí vấn đề callbackHell (gọi nhìu callback trong cùng một hàm). promise sẽ được khai báo với 2 giá trị biến rejected và resolve,
+		    reject dùng để nhận kết quả hoặc lỗi khi hàm thực hiện thất bại, resolve nhận một kết quả được trả về khi hàm thực hiện thành công.
+	 - async, await: Cũng là 1 kiểu promise. async được khai báo khi định nghĩa hàm( trước từ khóa function ), await sẽ được khai bao trong hàm 
+			 có khai báo async. await sẽ thực hiện như một promise nhưng sẽ trả về chỉ 1 kết quả vào một biến khi hàm thực hiện xong.
+II. nodejs trong môi trường lambda
+	1. Thành phần 1 hàm lambda nodejs:
+	 - Một function trong lambda sẽ được mặc định có các biến đầu vào theo thứ tự :(event, context, callback)
+	 - event: là nơi chứ các thông số request, giao thức, body, header được gửi lên từ người dùng.
+	 - context: là tham số chứa thông tin về các thông số hàm trong lambda.
+	 - callback: dùng để gửi 1 response hay 1 envent trả về cho người dùng.( nếu không dùng callback ta có thể return trực tiếp trong hàm).
+	 - Hàm trả về theo dạng hàm handler (một hàm sử lí sự kiện từ người dùng).
+	2. Triển khai source lên lambda
+	 - Có 2 cách  triền khai source lên lambda: Deploy trực tiếp tại trên lambda aws hoặc nén vào 1 file zip deploy lên qua serverless.
+	 - Trong lambda tính năng layer thể bổ sung các source modules hoặc file config dùng cho nhiều function.
+	 - Một layer có thể chứa 1 hoặc nhìu file được nén lại trong file zip và tải lên lambda. 
+	 - Để sử dụng gọn hàm hoặc thư viện trong layer chỉ cần sử require theo đường dẫn path là : ('/opt/Tên_File_Thư_viện')
+	3. Chạy và kiểm thử tại framework serverless
+	 - serverless là 1 framework hỗ trợ build lambda function nodejs trên localhost cần được cấu hình và cài đặt.
+	 - là 1 công cụng nén function deploy lên lambda aws.
+III. sơ lượt về source share
+	1. cấu trúc source share: 
+	 - Cấu trúc source được chia làm 2 phần (api gateway và lambda).
+	 - Trong phần lambda các thư mục sẽ chứa các function có chức năng tương ướng, riêng có 1 thư mục là layer cho các function.
+	 - Thư mục layer chứa các file dùng để:
+		 kết nối database(dbaccess), truy vấn biến môi trường (config), 
+		 file thực hiện kiểm tra quyền và truy vấn dữ liệu api (apibase), file chứa các hàm được sử dụng nhìu lần trong các function(utility).
+	 - (dbaccess) Database đươc kết nối dựa vào thư viện npm pg (thư viện hỗ trợ nodejs kết nối với postgre có thể sử dụng lại cho dự án),
+	   trong lớp dbaccess có xây dựng các phương thức hỗ trợ thực hiện truy vấn với database.
+	 - (apiBase) à một lớp đối tượng chứa các thuộc tính hỗ trợ cho các phương thức phân tích và truy vấn theo yêu cầu api. 
+	   Trong lớp đối tượng có 2 phương thức chính là execute và executeApi. 
+	   Execute là phương thức thực hiện tạo kết nối DB và kiểm tra các thông tin của request và người dùng đang gửi yêu cầu api. 
+	   Nếu trong phương thức thực hiện xảy ra lỗi sẽ sẽ trả về các trạng thái reponse statusCode(403 và 503).
+	   ExecuteApi là phương thức được các function lambda gọi và thực hiện câu lệnh sql theo yêu cầu api.
+	   Khi các câu truy vấn sql lên db thực hiện thành công sẽ trả về 1 response chứa statusCode và body(nêu có).
+	 - Các function gồm 1 lớp kế thừa từ lớp ApiBase và 1 handler function.
+	   Trong lớp đối tượng thực hiện phân tích lấy request lấy id user và tạo câu truy vấn trả về 1 response. 
+	   handler function khởi tạo 1 lớp vừa xây dựng và trả về kếu quả api.
+	 - Mỗi function lambda hoạt động riên biệt và chỉ hoạt động chung 1 layer.
+	2.Lưu ý: 
+	 - với lambda hạn chế sử dụng thư viện của nodejs.
+	 - các function lambda thường luôn có giá trị đầu vào và luôn có 1 giá trị trả về.(hàm không phụ thuộc)
+	 - Nắm được được quá trình chạy và gọi hàm trong các function.
+	 - Nên dùng cơ chế try catch để bắt các lỗi  và trả về các statusCode response.
+
+
+
